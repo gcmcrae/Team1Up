@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-Up Job Search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="background-color: #343a40;">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="logo.png" alt="Logo" height="30">
+            </a>
+            <div class="container d-flex justify-content-between align-items-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="signup.html">Sign Up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Log In</a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <span id="coinCount" style="color: white; margin-right: 20px;">Coins: 0</span>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Sign Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="profiles" class="container"></div>
+
+    <script>
+        // Function to create profile HTML
+        function createProfile(profile) {
+            return `
+            <div class="profile">
+                <h2>${profile.name}</h2>
+                <p>Description: ${profile.description}</p>
+                <p>Category: ${profile.category}</p>
+                <div class="profile-actions">
+                    <button onclick="applyJob('${profile.name}')">Confirm</button>
+                    <button onclick="nextProfile()">Deny</button>
+                </div>
+            </div>
+            `;
+        }
+    
+        // Function to display profiles
+        function displayProfiles() {
+            const profilesContainer = document.getElementById('profiles');
+            fetch('/randomteam')
+            .then(response => response.json())
+            .then(data => {
+    
+                const profile = {
+                    name: data.team.JOBID,
+                    description: data.team.description,
+                    category: data.team.category
+                };
+                profilesContainer.innerHTML = createProfile(profile);
+    
+                console.log(profile);
+                console.log(data);
+            })
+            .catch(error => console.error('Error fetching random team data:', error));
+        }
+    
+        function applyJob(jobName) {
+            fetch('/applyjob', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ JOBID: jobName })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Job application successful');
+                    // Call to decrement the coins
+                    decrementCoins();
+                } else {
+                    console.error('Error applying for the job');
+                    // Optional: Add logic to handle error or provide feedback to the user
+                }
+            })
+            .catch(error => console.error('Error applying for the job:', error));
+        }
+
+        function decrementCoins() {
+            fetch('/decrementCoins', {
+                method: 'POST',
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Coins decremented successfully');
+                    getContactInfo();
+                    window.location.reload(); // Reload the window after successful decrement
+                } else {
+                    response.text().then(text => console.error('Failed to decrement coins:', text));
+                }
+            })
+            .catch(error => {
+                console.error('Error decrementing coins:', error);
+            });
+        }
+        
+        // Function to show next profile
+        function nextProfile() {
+            window.location.reload(); // Just reloads the profile for simplicity
+        }
+
+        function getContactInfo() {
+            fetch('/checkMatch')
+                .then(response => response.json())
+                .then(data => {
+                    alert("Applied Contact Info: " + data.applied + "\nRecruited Contact Info: " + data.recruited);
+                })
+                .catch(error => {
+                    console.error('Error fetching contact info:', error);
+                    alert('Error fetching contact info. Please try again later.');
+                });
+        }
+    
+        displayProfiles();
+    </script>
+    
+
+
+<style>
+
+#profiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+}
+.profile {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 20px;
+    width: 300px;
+}
+.profile img {
+    border-radius: 50%;
+    margin-bottom: 10px;
+    width: 100px;
+    height: 100px;
+}
+.profile h2 {
+    margin-bottom: 5px;
+}
+.profile p {
+    margin: 0;
+}
+.profile-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+.profile-actions button {
+    background-color: #0000FF;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+.profile-actions button:hover {
+    background-color: #343a40;
+}
+</style>
+</body>
+</html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/getCoins')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('coinCount').textContent = `Coins: ${data.coins}`;
+        })
+        .catch(error => console.error('Error fetching coin data:', error));
+    });
+    </script>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-Up Job Search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="background-color: #343a40;">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="logo.png" alt="Logo" height="30">
+            </a>
+            <div class="container d-flex justify-content-between align-items-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="signup.html">Sign Up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Log In</a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <span id="coinCount" style="color: white; margin-right: 20px;">Coins: 0</span>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Sign Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="jobListings">
+        <!-- Job listings will be dynamically added here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const jobListingsContainer = document.getElementById('jobListings');
+
+            function fetchRandomApplication() {
+                fetch('/randomapplication?categoryID=YOUR_CATEGORY_ID')
+                .then(response => response.json())
+                .then(data => {
+                    const { application } = data;
+                    const jobListing = `
+                        <div class="jobListing">
+                            <h2>${application.description}</h2>
+                            <div class="job-actions">
+                                <button onclick="fetchRandomApplication()">Apply</button>
+                                <button onclick="fetchRandomApplication()">Ignore</button>
+                            </div>
+                        </div>
+                    `;
+                    jobListingsContainer.innerHTML = jobListing;
+                })
+                .catch(error => console.error('Error fetching random application:', error));
+            }
+
+            fetchRandomApplication(); // Fetch and display initial random application
+
+            document.addEventListener('click', function(event) {
+                if (event.target.matches('.job-actions button')) {
+                    fetchRandomApplication(); // Fetch and display a new random application on button click
+                }
+            });
+        });
+
+        // You can keep your CSS styles here
+    </script>
+</body>
+</html>
